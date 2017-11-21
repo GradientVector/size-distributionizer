@@ -1,0 +1,141 @@
+<div class="row">
+    <div class="col-sm-9">
+        <div class="row">
+            <div class="col-sm-12">
+                <input style="display:inline-block" name="file-input" type="file" (change)="onChange($event)" (click)="onClick($event)" accept=".jpg,.jpeg,.png" />
+                <p style="display:inline-block;" class="help-block">JPG/PNG Only. Use a converter program for other file types.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <svg #svg name="svg" style="border:solid;border-width:1px"
+                        preserveAspectRatio="xMinYMin meet"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        [ngStyle]="{'cursor': svgCursorStyle}"
+                        [attr.viewBox]="viewBox"
+                        (click)="onClick($event)"
+                        (mousedown)="onMouseDown($event)"
+                        (mousemove)="onSvgMouseMove($event)"
+                        (mousewheel)="onSvgMouseWheel($event)"
+                        width="100%" height="500">
+                    <svg:image width="0" height="0" [attr.width]="imageWidth" [attr.height]="imageHeight" [attr.xlink:href]="file?.data" />
+                    <g (mouseenter)="onMouseEnter(scale)"
+                       (mouseleave)="onMouseLeave(scale)">
+                        <svg:line [attr.x1]="scale.v1.x" [attr.y1]="scale.v1.y"
+                                  [attr.x2]="scale.v2.x" [attr.y2]="scale.v2.y"
+                                  [style.stroke]="scale.color" [class.path]="scale.isSelected"
+                                  [style.stroke-width]="lineSize">
+                        </svg:line>
+                        <circle (mousedown)="onMouseDownEndpoint1($event, scale)"
+                                [style.stroke]="scale.color"
+                                [style.stroke-width]="lineSize"
+                                class="endpoint" [attr.r]="endpointRadius"
+                                [attr.cx]="scale.v1.x" [attr.cy]="scale.v1.y" />
+                        <circle (mousedown)="onMouseDownEndpoint2($event, scale)"
+                                [style.stroke]="scale.color"
+                                [style.stroke-width]="lineSize"
+                                class="endpoint" [attr.r]="endpointRadius"
+                                [attr.cx]="scale.v2.x" [attr.cy]="scale.v2.y" />
+                        <text [style.fill]="scale.color" [style.font-size]="fontSize"
+                              [attr.x]="scale.textVector.x" [attr.y]="scale.textVector.y">
+                              {{scale.lengthInUnits}} {{scale.units}}</text>
+                    </g>
+                    <g *ngFor="let measurement of measurements"
+                       (mouseenter)="onMouseEnter(measurement)"
+                       (mouseleave)="onMouseLeave(measurement)">
+                        <svg:line [attr.x1]="measurement.v1.x" [attr.y1]="measurement.v1.y"
+                                  [attr.x2]="measurement.v2.x" [attr.y2]="measurement.v2.y"
+                                  [style.stroke]="measurement.color" [class.path]="measurement.isSelected"
+                                  [style.stroke-width]="lineSize">
+                        </svg:line>
+                        <circle (mousedown)="onMouseDownEndpoint1($event, measurement)"
+                                [style.stroke]="measurement.color"
+                                [style.stroke-width]="lineSize"
+                                class="endpoint" [attr.r]="endpointRadius"
+                                [attr.cx]="measurement.v1.x" [attr.cy]="measurement.v1.y" />
+                        <circle (mousedown)="onMouseDownEndpoint2($event, measurement)"
+                                [style.stroke]="measurement.color"
+                                [style.stroke-width]="lineSize"
+                                class="endpoint" [attr.r]="endpointRadius"
+                                [attr.cx]="measurement.v2.x" [attr.cy]="measurement.v2.y" />
+                        <text [style.fill]="measurement.color" [style.font-size]="fontSize"
+                              [attr.x]="measurement.textVector.x" [attr.y]="measurement.textVector.y">
+                              {{measurement.lengthInUnits}} {{measurement.units}}</text>
+                    </g>
+                </svg>
+                <!--[attr.width]="imageWidth" [attr.height]="imageHeight"-->
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <select name="toolMode" [(ngModel)]="toolMode">
+                    <option *ngFor="let toolMode of toolModes" value="{{toolMode.value}}">{{toolMode.name}}</option>
+                </select>
+                <input width="100" value="{{zoomPercent}}%" readonly="readonly" />
+                <button (click)="resetZoom()">Reset Zoom</button>
+                <button (click)="resetPan()">Reset Pan</button>
+
+                <span class="pull-right">
+                    Screen ({{screenVector.x}}, {{screenVector.y}})
+                    |
+                    Canvas ({{canvasVector.x}}, {{canvasVector.y}})
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">Measurements</div>
+            <div class="table-responsive">
+                <table class="table table-condensed table-hover table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>length</th>
+                            <th>px</th>
+                            <th class="fit">color</th>
+                            <th class="fit"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr (mouseenter)="onMouseEnter(scale)"
+                            (mouseleave)="onMouseLeave(scale)"
+                            [style.color]="scale.isSelected ? scale.color : null">
+                            <td>
+                                <input type="number" [(ngModel)]="scale.lengthInUnits" style="width:50px;" />
+                                <input type="text" [(ngModel)]="scale.units" style="width:40px;" placeholder="units" />
+                            </td>
+                            <td>{{scale.lengthInPixels}}</td>
+                            <td><input type="color" [(ngModel)]="scale.color" /></td>
+                            <td></td>
+                        </tr>
+                        <tr *ngFor="let measurement of measurements"
+                            (mouseenter)="onMouseEnter(measurement)"
+                            (mouseleave)="onMouseLeave(measurement)"
+                            [style.color]="measurement.isSelected ? measurement.color : null">
+                            <td>{{measurement.lengthInUnits}} {{measurement.units}}</td>
+                            <td>{{measurement.lengthInPixels}}</td>
+                            <td><input type="color" [(ngModel)]="measurement.color" /></td>
+                            <td>
+                                <button class="btn-link btn-danger danger" (click)="deleteMeasurement(measurement)">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn btn-primary" (click)="downloadCsvFile()">CSV</button>
+        <button class="btn btn-primary" (click)="downloadImageFile()">PNG</button>
+        <button class="btn btn-primary" (click)="downloadSvgFile()">SVG</button>
+
+        <svg id='histogram' width="100%" height="300" />
+
+    </div>
+</div>
+
+<canvas #hiddenCanvas style="display:none" [attr.width]="svgWidth" [attr.height]="svgHeight"></canvas>

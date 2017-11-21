@@ -1,0 +1,37 @@
+﻿.bar rect {
+    fill: steelblue;
+}
+
+.bar text {
+    fill: #fff;
+    font: 10px sans-serif;
+}
+
+.path {
+    stroke-dasharray: 10;
+    animation: dash 20s linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 1000;
+    }
+}
+
+.table td.fit,
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
+}
+
+.endpoint {
+    fill-opacity: 0;
+    stroke-opacity: 0;
+    stroke: #000;
+    stroke-width: 2;
+    cursor: pointer;
+}
+.endpoint:hover {
+    stroke-opacity: 1;
+}
