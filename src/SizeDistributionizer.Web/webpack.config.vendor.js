@@ -22,6 +22,7 @@ const nonTreeShakableModules = [
     'event-source-polyfill',
     'file-saver',
     'jquery',
+    'ng2-google-charts'
 ];
 const allModules = treeShakableModules.concat(nonTreeShakableModules);
 

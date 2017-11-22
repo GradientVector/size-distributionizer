@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
 
+import { Ng2GoogleChartsModule } from 'ng2-google-charts';
+
 import { AppComponent } from './components/app/app.component';
 import { NavMenuComponent } from './components/navmenu/navmenu.component';
 import { HomeComponent } from './components/home/home.component';
@@ -22,6 +24,7 @@ import { TermsAndConditionsComponent } from './components/terms-and-conditions/t
         TermsAndConditionsComponent
     ],
     imports: [
+        Ng2GoogleChartsModule,
         CommonModule,
         BrowserModule,
         HttpModule,

@@ -74,7 +74,7 @@
                 <select name="toolMode" [(ngModel)]="toolMode">
                     <option *ngFor="let toolMode of toolModes" value="{{toolMode.value}}">{{toolMode.name}}</option>
                 </select>
-                <input width="100" value="{{zoomPercent}}%" readonly="readonly" />
+                <input style="width:80px;" value="{{zoomPercent}}%" readonly="readonly" />
                 <button (click)="resetZoom()">Reset Zoom</button>
                 <button (click)="resetPan()">Reset Pan</button>
 
@@ -88,6 +88,10 @@
     </div>
 
     <div class="col-sm-3">
+
+
+        <google-chart #cchart [data]="pieChartData"></google-chart>
+
         <div class="panel panel-default">
             <div class="panel-heading">Measurements</div>
             <div class="table-responsive">
@@ -133,7 +137,7 @@
         <button class="btn btn-primary" (click)="downloadImageFile()">PNG</button>
         <button class="btn btn-primary" (click)="downloadSvgFile()">SVG</button>
 
-        <svg id='histogram' width="100%" height="300" />
+        <!--<svg id='histogram' width="100%" height="300" />-->
 
     </div>
 </div>

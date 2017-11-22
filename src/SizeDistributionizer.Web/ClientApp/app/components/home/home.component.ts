@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { saveAs } from 'file-saver';
+import { GoogleChartComponent } from 'ng2-google-charts';
 
 enum ToolMode {
     Pan = 0,
@@ -237,6 +238,8 @@ export class HomeComponent implements OnInit {
         this.isPanning = false;
         this.isDrawing = false;
         this.selectedEndpoint = 0;
+
+        this.redrawDistribution();
     }
 
     onChange(event: EventTarget) {
@@ -326,7 +329,7 @@ export class HomeComponent implements OnInit {
         return new CanvasVector(Number.parseInt(x.toFixed(0)), Number.parseInt(y.toFixed(0)));
     }
 
-    scale: Measurement = new Measurement(new CanvasVector(100, 100), new CanvasVector(200, 100), undefined, "#0000ff");
+    scale: Measurement = new Measurement(new CanvasVector(100, 100), new CanvasVector(200, 100), undefined, "#0000ff", (measurement) => this.redrawDistribution());
 
     measurements: Measurement[] = [];
     addMeasurement(x1: number, y1: number, x2?: number, y2?: number) {
@@ -403,6 +406,28 @@ export class HomeComponent implements OnInit {
         let blob = new Blob([data], { type: 'image/svg+xml' });
         saveAs(blob, this.getFilename('svg'));
     }
+
+    @ViewChild('cchart') cchart: GoogleChartComponent;
+    pieChartData = {
+        chartType: 'Histogram',
+        dataTable: [['Measurement', 'Length']],
+        options: { title: 'Size Distribution', legend: { position: 'none' } },
+    };
+
+    setPieChartData() {
+        this.pieChartData = {
+            chartType: 'Histogram',
+            dataTable: [['Measurement', 'Length']].concat(this.measurements.map(m => [`${m.lengthInUnits} ${m.units}`, m.lengthInUnits!.toString()])),
+            options: { title: 'Size Distribution', legend: { position: 'none' } },
+        };
+    }
+
+    redrawDistribution() {
+        this.setPieChartData();
+        let googleChartWrapper = this.cchart.wrapper;
+        //force a redraw
+        this.cchart.redraw();
+    }
 }
 
 class Vector {
@@ -428,6 +453,7 @@ class Measurement {
         public v2: Vector,
         protected scale?: Measurement,
         public color: string = '#ff0000',
+        protected changeCallback: (measurement: Measurement) => void = () => {}
     ) {
 
     }
@@ -445,6 +471,7 @@ class Measurement {
     }
     set lengthInUnits(value) {
         this._lengthInUnits = value;
+        this.changeCallback(this);
     }
     _lengthInUnits?: number = 100;
 
@@ -458,6 +485,7 @@ class Measurement {
     }
     set units(value) {
         this._units = value;
+        this.changeCallback(this);
     }
 
     isSelected: boolean;
