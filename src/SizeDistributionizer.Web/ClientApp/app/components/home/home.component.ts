@@ -343,6 +343,7 @@ export class HomeComponent implements OnInit {
     deleteMeasurement(measurement: Measurement) {
         let i = this.measurements.indexOf(measurement);
         this.measurements.splice(i, 1);
+        this.redrawDistribution();
     }
 
     onMouseEnter(measurement: Measurement) {
