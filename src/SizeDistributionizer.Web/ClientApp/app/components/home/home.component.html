@@ -19,6 +19,7 @@
                         (mousedown)="onMouseDown($event)"
                         (mousemove)="onSvgMouseMove($event)"
                         (mousewheel)="onSvgMouseWheel($event)"
+                        (contextmenu)="onContextMenu($event)"
                         width="100%" height="500">
                     <svg:image width="0" height="0" [attr.width]="imageWidth" [attr.height]="imageHeight" [attr.xlink:href]="file?.data" />
                     <g (mouseenter)="onMouseEnter(scale)"
@@ -81,7 +82,8 @@
                 <span class="pull-right">
                     Screen ({{screenVector.x}}, {{screenVector.y}})
                     |
-                    Canvas ({{canvasVector.x}}, {{canvasVector.y}})
+                    Canvas ({{canvasVectorDisplay.x}}<span class="text-muted">{{panDiffX}}</span>,
+                        {{canvasVectorDisplay.y}}<span class="text-muted">{{panDiffY}}</span>)
                 </span>
             </div>
         </div>

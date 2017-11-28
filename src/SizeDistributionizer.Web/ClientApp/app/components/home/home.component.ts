@@ -137,12 +137,6 @@ export class HomeComponent implements OnInit {
     resetZoom() {
         this.zoom = 0;
     }
-    zoomIn() {
-        this.zoom--;
-    }
-    zoomOut() {
-        this.zoom++;
-    }
     get zoomFactor() { return Math.pow(2, this.zoom); }
     get zoomPercent() { return Math.pow(2, -this.zoom) * 100;}
     viewBoxVector: CanvasVector = new CanvasVector(0, 0);
@@ -182,6 +176,29 @@ export class HomeComponent implements OnInit {
     set canvasVector(value: CanvasVector) {
         this._canvasVector = value;
         this._screenVector = this.toScreen(value);
+    }
+
+    get canvasVectorDisplay(): CanvasVector {
+        if (this.isPanning) {
+            return this.mouseDownStartVector;
+        } else {
+            return this.canvasVector;
+        }
+    }
+
+    get panDiffX(): string {
+        if (this.isPanning) {
+            return ` + ${this.canvasVector.x - this.mouseDownStartVector.x}`;
+        } else {
+            return "";
+        }
+    }
+    get panDiffY(): string {
+        if (this.isPanning) {
+            return ` + ${this.canvasVector.y - this.mouseDownStartVector.y}`;
+        } else {
+            return "";
+        }
     }
 
     file: MyFile;
@@ -226,9 +243,17 @@ export class HomeComponent implements OnInit {
         event.preventDefault();
     }
 
-    onMouseUp(event: MouseEvent) {
+    onContextMenu(event: Event) {
+        // Prevent right-click menu.
+        event.preventDefault();
+    }
 
-        this.mouseDownStartViewBoxVector = new CanvasVector(this.canvasVector.x, this.canvasVector.y);
+    onMouseUp(event: MouseEvent) {
+        let rec = (<SVGElement>this.svg.nativeElement).getBoundingClientRect();
+        this.mouseDownStartViewBoxVector = new CanvasVector(this.viewBoxVector.x, this.viewBoxVector.y);
+        this.screenVector = new ScreenVector(event.x - rec.left, event.y - rec.top);
+        this.mouseDownStartVector = new CanvasVector(this.canvasVector.x, this.canvasVector.y);
+        // If Pan-mode or not clicking with left mouse button.
         if (this.isPanning) {
 
         } else if (this.isDrawing) {
@@ -302,19 +327,29 @@ export class HomeComponent implements OnInit {
             this.viewBoxVector.y += (delta * 10);
         } else if (event.ctrlKey) { // Pan Horizontal.
             this.viewBoxVector.x += (delta * 10);
-        } else { // Zoom
-            let prevWidth = this.viewBoxWidth;
-            let prevHeight = this.viewBoxHeight;
-            this.zoom -= delta;
-            let newWidth = this.viewBoxWidth;
-            let newHeight = this.viewBoxHeight;
-            // Determine how much to shift x,y
-            let shiftX = (this.screenVector.x / this.correctedSvgWidth) * (newWidth - prevWidth);
-            let shiftY = (this.screenVector.y / this.correctedSvgHeight) * (newHeight - prevHeight);
-            this.viewBoxVector.x -= shiftX;
-            this.viewBoxVector.y -= shiftY;
+        } else {
+            this.zoomDelta(delta);
         }
         event.preventDefault();
+    }
+
+    zoomDelta(delta: number) {
+        let prevWidth = this.viewBoxWidth;
+        let prevHeight = this.viewBoxHeight;
+        this.zoom -= delta;
+        let newWidth = this.viewBoxWidth;
+        let newHeight = this.viewBoxHeight;
+        // Determine how much to shift x,y
+        let shiftX = (this.screenVector.x / this.correctedSvgWidth) * (newWidth - prevWidth);
+        let shiftY = (this.screenVector.y / this.correctedSvgHeight) * (newHeight - prevHeight);
+        this.viewBoxVector.x -= shiftX;
+        this.viewBoxVector.y -= shiftY;
+    }
+    zoomIn() {
+        this.zoomDelta(1);
+    }
+    zoomOut() {
+        this.zoomDelta(-1);
     }
 
     toScreen(v: CanvasVector): ScreenVector {
